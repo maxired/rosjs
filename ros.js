@@ -2,6 +2,25 @@ var ros = (function() {
 
   var ros = {};
 
+  // Messages
+  // --------
+
+  ros.message = function(type) {
+    this.type = type;
+  };
+
+  ros.types = function(types, callback) {
+    var that = this;
+
+    var messages = [];
+    types.forEach(function(type) {
+      var message = new ros.message(type);
+      messages.push(message);
+    });
+
+    callback.apply(that, messages);
+  };
+
   // Topics
   // ------
 
