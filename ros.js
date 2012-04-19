@@ -1,7 +1,7 @@
 var ROS = (function() {
 
   var ros = function(url) {
-
+    // connect to web socket
   };
   ros.prototype.__proto__ = EventEmitter2.prototype;
 
@@ -27,14 +27,12 @@ var ROS = (function() {
     this.topic       = options.topic;
     this.messageType = options.messageType;
 
-    // Connect to socket.io
-
     this.subscribe = function(callback) {
-      this.on('message', callback);
+      // ws.on(uniqueId, callback);
     };
 
     this.publish = function(message) {
-
+      // ws.send(uniqueId, callback);
     };
   };
   ros.prototype.topic.prototype.__proto__ = EventEmitter2.prototype;
