@@ -1,8 +1,8 @@
-var ros = new ROS('http://localhost:8000');
+var ros = new ROS('ws://localhost:9090');
 ros.types([
-  'geometry_msgs/Twist'
-, 'people_tracker/ImagePosition'
-], function(Twist, Pos) {
+  'std_msgs/String'
+, 'geometry_msgs/Twist'
+], function(String, Twist) {
   console.log('Created message types');
 
   // Pub / Sub
@@ -21,44 +21,65 @@ ros.types([
     console.log('cmdVel error: ' + error);
   });
 
+  var twist = new Twist({
+    angular: {
+      x: 1
+    , y: 0
+    , z: 0
+    }
+  , linear: {
+      x: 0
+    , y: 0
+    , z: 0
+    }
+  });
+  cmdVel.publish(twist);
+  console.log('Published message on ' + cmdVel.topic);
+
   // Subscribe to messages on the /cmd_vel topic
-  cmdVel.subscribe(function(message) {
-    console.log('Message on ' + cmdVel.topic + ': ' + message);
+  var listener = new ros.topic({
+    node        : 'talker'
+  , topic       : '/listener'
+  , messageType : String
+  });
+  console.log('Created topic ' + listener.topic);
+  listener.subscribe(function(message) {
+    console.log('Received message on ' + listener.topic + ': ' + message.data);
   });
 
 
-  // Services
-  // --------
+  // // Services
+  // // --------
 
-  // Create a new service, add_two_ints
-  var addTwoInts = new ros.service({
-    service : 'add_two_ints'
-  });
+  // // Create a new service, add_two_ints
+  // var addTwoInts = new ros.service({
+  //   service : 'add_two_ints'
+  // });
 
-  // Call the service and with a callback for the results
-  addTwoInts.callService(2, 3, function(results) {
-    console.log('Result for service call on ' + addTwoInts.service + ': ' + results.sum);
-  });
+  // // Call the service and with a callback for the results
+  // addTwoInts.callService(2, 3, function(results) {
+  //   console.log('Result for service call on ' + addTwoInts.service + ': ' + results.sum);
+  // });
 
 
-  // Params
-  // ------
+  // // Params
+  // // ------
 
-  // Create a new param socket
-  var maxVelX = new ros.param({
-    param: 'max_vel_x'
-  });
+  // // Create a new param socket
+  // var maxVelX = new ros.param({
+  //   param: 'max_vel_x'
+  // });
 
-  // Get the current value
-  var maxX = maxVelX.get();
+  // // Get the current value
+  // var maxX = maxVelX.get();
 
-  // Receive notifications when the param is updated
-  maxVelX.on('update', function(value) {
-    maxX = value;
-  });
+  // // Receive notifications when the param is updated
+  // maxVelX.on('update', function(value) {
+  //   maxX = value;
+  // });
 
-  // Set the param to a value.
-  maxVelX.set(1.0);
+  // // Set the param to a value.
+  // maxVelX.set(1.0);
 
 });
 

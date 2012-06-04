@@ -1,37 +1,93 @@
 var ROS = (function() {
 
+  var socket = null;
+  var handlers = {};
+
   var ros = function(url) {
-    // connect to web socket
+    var that = this;
+    socket = new WebSocket(url);
+
+    socket.onopen = function(event) {
+      that.emit('connection', event);
+    };
+
+    socket.onclose = function(event) {
+      that.emit('close', event);
+    };
+
+    socket.onerror = function(event) {
+      that.emit('error', event);
+    };
+
+    socket.onmessage = function(message) {
+      var data = JSON.parse(message.data);
+      if (handlers[data.receiver]) {
+        handlers[data.receiver](data.msg);
+      }
+    };
   };
   ros.prototype.__proto__ = EventEmitter2.prototype;
 
   ros.prototype.types = function(messageTypes, callback) {
     var that = this;
 
-    var messages = [];
-    messageTypes.forEach(function(messageType) {
-      // Request from the server the details for the message type:
-      details = {};
-      // Create the message class:
-      var message = buildMessage(details);
-      messages.push(message);
-    });
+    function fetchMessageTypes() {
+      var messages = [];
+      messageTypes.forEach(function(messageType) {
+        details = {
+          messageType: messageType
+        };
+        var message = buildMessage(details);
+        messages.push(message);
+      });
 
-    callback.apply(that, messages);
+      callback.apply(that, messages);
+    }
+
+    if (socket.readyState !== WebSocket.OPEN) {
+      that.on('connection', fetchMessageTypes);
+    }
+    else {
+      fetchMessageTypes();
+    }
   };
 
   ros.prototype.topic = function(options) {
+    var that = this;
+
     options = options || {};
     this.node        = options.node;
     this.topic       = options.topic;
-    this.messageType = options.messageType;
+    this.messageType = options.messageType
 
     this.subscribe = function(callback) {
-      // ws.on(uniqueId, callback);
+
+      this.on('message', function(message) {
+        callback(message);
+      });
+
+      handlers[this.topic] = function(data) {
+        var message = new that.messageType(data);
+        that.emit('message', message);
+      };
+      var call = {
+        receiver : '/rosjs/subscribe'
+      , msg      : [
+          this.topic
+        , -1
+        ]
+      };
+      socket.send(JSON.stringify(call));
     };
 
     this.publish = function(message) {
-      // ws.send(uniqueId, callback);
+      var call = {
+        receiver : this.topic
+      , msg      : message.toJSON()
+      , type     : this.messageType.messageType
+      }
+
+      socket.send(JSON.stringify(call));
     };
   };
   ros.prototype.topic.prototype.__proto__ = EventEmitter2.prototype;
@@ -73,37 +129,24 @@ var ROS = (function() {
       }
 
       var that = this;
-      if (details.constants) {
-        details.constants.forEach(function(constant) {
-          that[constant.name] = constant.value || null;
-        });
-      }
-      if (details.fields) {
-        details.fields.forEach(function(field) {
-          that[field.name] = field.value || null;
-        });
-      }
       if (values) {
         Object.keys(values).forEach(function(name) {
           that[name] = values[name];
         });
       }
+
+      this.toJSON = function() {
+        var object = {}
+        Object.keys(that).forEach(function(name) {
+          if (name !== 'messageType') {
+            object[name] = that[name];
+          }
+        });
+        return object;
+      };
     }
 
-    message.messageType = message.prototype.messageType = details.messageType;
-    message.packageName = message.prototype.packageName = details.packageName;
-    message.messageName = message.prototype.messageName = details.messageName;
-    message.md5         = message.prototype.md5         = details.md5;
-    message.constants   = message.prototype.constants   = details.constants;
-    message.fields      = message.prototype.fields      = details.fields;
-
-    if (details.fields) {
-      details.fields.forEach(function(field) {
-        if (field.messageType) {
-          field.messageType = buildMessage(field.messageType);
-        }
-      });
-    }
+    message.messageType = details.messageType;
 
     return message;
   }
