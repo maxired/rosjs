@@ -47,6 +47,10 @@ ros.types([
     console.log('Received message on ' + listener.topic + ': ' + message.data);
   });
 
+  ros.getTopics(function(topics) {
+    console.log('Current topics in ROS:' + topics);
+  });
+
 
   // // Services
   // // --------
@@ -60,6 +64,10 @@ ros.types([
   // addTwoInts.callService(2, 3, function(results) {
   //   console.log('Result for service call on ' + addTwoInts.service + ': ' + results.sum);
   // });
+
+  ros.getServices(function(services) {
+    console.log('Current services in ROS:' + services);
+  });
 
 
   // // Params

@@ -28,6 +28,28 @@ var ROS = (function() {
   };
   ros.prototype.__proto__ = EventEmitter2.prototype;
 
+  ros.prototype.getTopics = function(callback) {
+    handlers['/rosjs/topics'] = function(data) {
+      callback(data);
+    };
+    var call = {
+      receiver : '/rosjs/topics'
+    , msg      : []
+    };
+    socket.send(JSON.stringify(call));
+  };
+
+  ros.prototype.getServices = function (callback) {
+    handlers['/rosjs/services'] = function(data) {
+      callback(data);
+    };
+    var call = {
+      receiver : '/rosjs/services'
+    , msg      : []
+    };
+    socket.send(JSON.stringify(call));
+  };
+
   ros.prototype.types = function(messageTypes, callback) {
     var that = this;
 
