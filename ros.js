@@ -114,13 +114,46 @@ var ROS = (function() {
   };
   ros.prototype.topic.prototype.__proto__ = EventEmitter2.prototype;
 
+  ros.prototype.services = function(serviceTypes, callback) {
+    var that = this;
+
+    function fetchServiceTypes() {
+      var services = [];
+      serviceTypes.forEach(function(serviceType) {
+        details = {
+          serviceType: serviceType
+        };
+        var service = buildService(details);
+        services.push(service);
+      });
+
+      callback.apply(that, services);
+    }
+
+    if (socket.readyState !== WebSocket.OPEN) {
+      that.on('connection', fetchServiceTypes);
+    }
+    else {
+      fetchServiceTypes();
+    }
+  };
+
   ros.prototype.service = function(options) {
+    var that = this;
     options = options || {};
-    this.node    = options.node;
-    this.service = options.service;
+    this.name        = options.name;
+    this.serviceType = options.serviceType;
 
-    this.callService = function(args, callback) {
-
+    this.callService = function(service, callback) {
+      handlers[that.name] = function(data) {
+        var response = new that.serviceType.response(data);
+        callback(response);
+      };
+      var call = {
+        receiver : that.name
+      , msg      : service.toJSON()
+      };
+      socket.send(JSON.stringify(call));
     };
   };
   ros.prototype.service.prototype.__proto__ = EventEmitter2.prototype;
@@ -171,6 +204,60 @@ var ROS = (function() {
     message.messageType = details.messageType;
 
     return message;
+  }
+
+  function buildService(details) {
+
+    function request(values) {
+      if (!(this instanceof request)) {
+        return new request(values);
+      }
+
+      var that = this;
+      if (values) {
+        Object.keys(values).forEach(function(name) {
+          that[name] = values[name];
+        });
+      }
+
+      this.toJSON = function() {
+        var values = []
+        Object.keys(that).forEach(function(name) {
+          if (typeof that[name] !== 'function') {
+            values.push(that[name]);
+          }
+        });
+        return values;
+      };
+    }
+
+    function response(values) {
+      if (!(this instanceof response)) {
+        return new response(values);
+      }
+
+      var that = this;
+      if (values) {
+        Object.keys(values).forEach(function(name) {
+          that[name] = values[name];
+        });
+      }
+
+      this.toJSON = function() {
+        var values = []
+        Object.keys(that).forEach(function(name) {
+          if (typeof that[name] !== 'function') {
+            values.push(that[name]);
+          }
+        });
+      };
+    }
+
+    return {
+      request  : request
+    , response : response
+    , name     : details.serviceType
+    };
   }
 
   return ros;
