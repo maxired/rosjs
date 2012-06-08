@@ -271,6 +271,17 @@ var ROS = (function() {
   // Params
   // ------
 
+  ros.prototype.getParamList = function(callback) {
+    handlers['/rosjs/get_param_names'] = function(data) {
+      callback(data);
+    };
+    var call = {
+      receiver : '/rosjs/get_param_names'
+    , msg      : []
+    };
+    socket.send(JSON.stringify(call));
+  };
+
   ros.prototype.param = function(options) {
     if (!(this instanceof ros.prototype.param)) {
       return new ros.prototype.param(options);

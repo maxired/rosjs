@@ -4,6 +4,7 @@ ros.on('error', function(error) {
   console.log(error);
 });
 
+
 // Topics
 // ------
 
@@ -88,7 +89,7 @@ ros.serviceTypes([
 
   // Retrieve list of all active services in ROS
   ros.getServiceList(function(services) {
-    console.log('Current services in ROS:' + services);
+    console.log('Current services in ROS: ' + services);
   });
 });
 
@@ -105,6 +106,10 @@ ros.on('connection', function() {
 
   maxVelX.get(function(value) {
     console.log('Value of ' + maxVelX.name + ' is ' + value);
+  });
+
+  ros.getParamList(function(params) {
+    console.log('Current params in ROS: ' + params);
   });
 
 });
