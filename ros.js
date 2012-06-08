@@ -86,23 +86,32 @@ var ROS = (function() {
         callback(message);
       });
 
-      handlers[that.topic] = function(data) {
+      handlers[that.name] = function(data) {
         var message = new that.messageType(data);
         that.emit('message', message);
       };
       var call = {
         receiver : '/rosjs/subscribe'
       , msg      : [
-          that.topic
+          that.name
         , -1
         ]
       };
       socket.send(JSON.stringify(call));
     };
 
+    that.unregisterSubscriber = function() {
+      var call = {
+        receiver : '/rosjs/unsubscribe'
+      , msg      : [that.name]
+      };
+
+      socket.send(JSON.stringify(call));
+    };
+
     that.publish = function(message) {
       var call = {
-        receiver : that.topic
+        receiver : that.name
       , msg      : message.toJSON()
       , type     : that.messageType.messageType
       };

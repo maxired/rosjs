@@ -16,7 +16,7 @@ ros.messageTypes([
   // Create a new topic, /cmd_vel
   var cmdVel = new ros.topic({
     node        : 'talker'
-  , name        : '/cmd_vel'
+  , name        : 'cmd_vel'
   , messageType : Twist
   });
   console.log('Created topic ' + cmdVel.name);
@@ -41,7 +41,7 @@ ros.messageTypes([
   cmdVel.publish(twist);
   console.log('Published message on ' + cmdVel.name);
 
-  // Subscribe to messages on the /cmd_vel topic
+  // Subscribe to messages on the /listener topic
   var listener = new ros.topic({
     node        : 'talker'
   , name        : '/listener'
@@ -50,6 +50,7 @@ ros.messageTypes([
   console.log('Created topic ' + listener.name);
   listener.subscribe(function(message) {
     console.log('Received message on ' + listener.name + ': ' + message.data);
+    listener.unregisterSubscriber();
   });
 
   // Retrieve list of all active topics in ROS
