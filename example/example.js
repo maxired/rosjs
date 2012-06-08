@@ -7,7 +7,7 @@ ros.on('error', function(error) {
 // Topics
 // ------
 
-ros.types([
+ros.messageTypes([
   'std_msgs/String'
 , 'geometry_msgs/Twist'
 ], function(String, Twist) {
@@ -16,10 +16,10 @@ ros.types([
   // Create a new topic, /cmd_vel
   var cmdVel = new ros.topic({
     node        : 'talker'
-  , topic       : 'cmd_vel'
+  , name        : '/cmd_vel'
   , messageType : Twist
   });
-  console.log('Created topic ' + cmdVel.topic);
+  console.log('Created topic ' + cmdVel.name);
 
   // Listen for errors on /cmd_vel
   cmdVel.on('error', function(error) {
@@ -39,20 +39,21 @@ ros.types([
     }
   });
   cmdVel.publish(twist);
-  console.log('Published message on ' + cmdVel.topic);
+  console.log('Published message on ' + cmdVel.name);
 
   // Subscribe to messages on the /cmd_vel topic
   var listener = new ros.topic({
     node        : 'talker'
-  , topic       : '/listener'
+  , name        : '/listener'
   , messageType : String
   });
-  console.log('Created topic ' + listener.topic);
+  console.log('Created topic ' + listener.name);
   listener.subscribe(function(message) {
-    console.log('Received message on ' + listener.topic + ': ' + message.data);
+    console.log('Received message on ' + listener.name + ': ' + message.data);
   });
 
-  ros.getTopics(function(topics) {
+  // Retrieve list of all active topics in ROS
+  ros.getTopicList(function(topics) {
     console.log('Current topics in ROS:' + topics);
   });
 
@@ -62,9 +63,11 @@ ros.types([
 // Services
 // --------
 
-ros.services([
+ros.serviceTypes([
   'rospy_tutorials/AddTwoInts'
 ], function(AddTwoInts) {
+  console.log('Created service types');
+
   // Create a new service client
   var addTwoIntsClient = new ros.service({
     name        : '/add_two_ints'
@@ -82,7 +85,8 @@ ros.services([
     console.log('Result for service call on ' + addTwoIntsClient.name + ': ' + result.sum);
   });
 
-  ros.getServices(function(services) {
+  // Retrieve list of all active services in ROS
+  ros.getServiceList(function(services) {
     console.log('Current services in ROS:' + services);
   });
 });
@@ -92,12 +96,10 @@ ros.services([
 // ------
 
 ros.on('connection', function() {
-  // Create a new param socket
   var maxVelX = new ros.param({
     name: 'max_vel_x'
   });
 
-  // Set the param to a value.
   maxVelX.set('sup world');
 
   maxVelX.get(function(value) {
