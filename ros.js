@@ -159,20 +159,31 @@ var ROS = (function() {
   ros.prototype.service.prototype.__proto__ = EventEmitter2.prototype;
 
   ros.prototype.param = function(options) {
-    this.node  = options.node;
-    this.param = options.param;
-    this.value = options.value;
+    var that = this;
+    options = options || {};
+    this.name  = options.name;
 
     this.on('update', function(value) {
       this.value = value;
     });
 
-    this.get = function() {
-      return this.value;
+    this.get = function(callback) {
+      handlers['/rosjs/get_param'] = function(value) {
+        callback(value);
+      };
+      var call = {
+        receiver : '/rosjs/get_param'
+      , msg      : [that.name]
+      };
+      socket.send(JSON.stringify(call));
     };
 
     this.set = function(value) {
-
+      var call = {
+        receiver : '/rosjs/set_param'
+      , msg      : [that.name, value]
+      };
+      socket.send(JSON.stringify(call));
     };
   }
   ros.prototype.param.prototype.__proto__ = EventEmitter2.prototype;
