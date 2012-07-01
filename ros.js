@@ -14,7 +14,6 @@
     // Socket Handler
     // --------------
 
-    var handlers = {};
     var socket = new WebSocket(url);
     socket.onopen = function(event) {
       ros.emit('connection', event);
@@ -27,14 +26,13 @@
     };
     socket.onmessage = function(message) {
       var data = JSON.parse(message.data);
-      if (handlers[data.receiver]) {
-        handlers[data.receiver](data.msg);
+      if (data.receiver) {
+        ros.emit(data.receiver, data.msg);
       }
     };
 
     function callOnConnection(message) {
       var messageJson = JSON.stringify(message);
-      console.log(messageJson);
       if (socket.readyState !== WebSocket.OPEN) {
         ros.once('connection', function() {
           socket.send(messageJson);
@@ -50,9 +48,9 @@
     // ------
 
     ros.getTopicList = function(callback) {
-      handlers['/rosjs/topics'] = function(data) {
+      ros.once('/rosjs/topics', function(data) {
         callback(data);
-      };
+      });
       var call = {
         receiver : '/rosjs/topics'
       , msg      : []
@@ -81,10 +79,10 @@
           callback(message);
         });
 
-        handlers[topic.name] = function(data) {
+        ros.on(topic.name, function(data) {
           var message = new ros.Message(data);
           topic.emit('message', message);
-        };
+        });
         var call = {
           receiver : '/rosjs/subscribe'
         , msg      : [topic.name, -1]
@@ -93,6 +91,7 @@
       };
 
       topic.unregisterSubscriber = function() {
+        ros.removeAllListeners([topic.name]);
         var call = {
           receiver : '/rosjs/unsubscribe'
         , msg      : [topic.name]
@@ -116,9 +115,9 @@
     // --------
 
     ros.getServiceList = function(callback) {
-      handlers['/rosjs/services'] = function(data) {
+      ros.once('/rosjs/services', function(data) {
         callback(data);
-      };
+      });
       var call = {
         receiver : '/rosjs/services'
       , msg      : []
@@ -151,10 +150,10 @@
       service.serviceType = options.serviceType;
 
       service.callService = function(request, callback) {
-        handlers[service.name] = function(data) {
+        ros.once(service.name, function(data) {
           var response = new ros.ServiceResponse(data);
           callback(response);
-        };
+        });
         var requestValues = [];
         Object.keys(request).forEach(function(name) {
           requestValues.push(request[name]);
@@ -173,9 +172,9 @@
     // ------
 
     ros.getParamList = function(callback) {
-      handlers['/rosjs/get_param_names'] = function(data) {
+      ros.once('/rosjs/get_param_names', function(data) {
         callback(data);
-      };
+      });
       var call = {
         receiver : '/rosjs/get_param_names'
       , msg      : []
@@ -189,9 +188,9 @@
       param.name = options.name;
 
       param.get = function(callback) {
-        handlers['/rosjs/get_param'] = function(value) {
+        ros.once('/rosjs/get_param', function(value) {
           callback(value);
-        };
+        });
         var call = {
           receiver : '/rosjs/get_param'
         , msg      : [param.name]
