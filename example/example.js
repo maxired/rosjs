@@ -1,20 +1,30 @@
+
+// Connecting to ROS
+// -----------------
+
+// Create a connection to the rosbridge WebSocket server.
 var ros = new ROS('ws://localhost:9090');
 
+// If there is an error on the backend, an 'error' emit will be emitted.
 ros.on('error', function(error) {
   console.log(error);
 });
 
 
-// Topics
-// ------
+// Publishing a Topic
+// ------------------
 
+// First, we create a Topic object with details of the topic's node, name, and
+// message type.
 var cmdVel = new ros.Topic({
   node        : 'talker'
 , name        : '/cmd_vel'
 , messageType : 'geometry_msgs/Twist'
 });
-console.log('Created topic ' + cmdVel.name);
 
+// Then we create the payload to be published. The object we pass in to
+// ros.Message matches the fields defined in the geometry_msgs/Twist .msg
+// definition.
 var twist = new ros.Message({
   angular: {
     x: 1
@@ -27,63 +37,76 @@ var twist = new ros.Message({
   , z: 0
   }
 });
-cmdVel.publish(twist);
-console.log('Published message on ' + cmdVel.name);
 
-// Subscribe to messages on the /listener topic
+// And finally, publish.
+cmdVel.publish(twist);
+
+
+// Subscribing to a Topic
+// ----------------------
+
+// Like when publishing a topic, we first create a Topic object with details of
+// the topic's node, name, and message type. Note that we can call publish or
+// subscribe on the same topic object.
 var listener = new ros.Topic({
   node        : 'talker'
 , name        : '/listener'
 , messageType : 'std_msgs/String'
 });
-console.log('Created topic ' + listener.name);
 
+// Then we add a callback to be called every time a message is published on this
+// topic.
 listener.subscribe(function(message) {
   console.log('Received message on ' + listener.name + ': ' + message.data);
+
+  // If desired, we can unsubscribe from the topic as well.
   listener.unregisterSubscriber();
 });
 
-// Retrieve list of all active topics in ROS
-ros.getTopicList(function(topics) {
-  console.log('Current topics in ROS:' + topics);
-});
 
+// Calling a service
+// -----------------
 
-// Services
-// --------
-
-// Create a new service client
+// First, we create a Service client with details of the service's name and
+// service type.
 var addTwoIntsClient = new ros.Service({
   name        : '/add_two_ints'
 , serviceType : 'rospy_tutorials/AddTwoInts'
 });
 
-// Call the service with a callback for the results
+// Then we create a Service Request. The object we pass in to
+// ros.ServiceRequest matches the fields defined in the rospy_tutorials'
+// AddTwoInts.srv file.
 var request = new ros.ServiceRequest({ A: 1, B: 2});
+
+// Finally, we call the /add_two_ints service and get back the results in the
+// callback. The result is a ros.ServiceResponse object.
 addTwoIntsClient.callService(request, function(result) {
   console.log('Result for service call on ' + addTwoIntsClient.name + ': ' + result.sum);
 });
 
-// Retrieve list of all active services in ROS
-ros.getServiceList(function(services) {
-  console.log('Current services in ROS: ' + services);
-});
 
+// Setting a param value
+// ---------------------
 
-// Params
-// ------
-
+// First, we create a Param object with the name of the param.
 var maxVelX = new ros.Param({
   name: 'max_vel_x'
 });
 
-maxVelX.set('sup world');
+// Then we set the value of the param, which is sent to the ROS Parameter
+// Server.
+maxVelX.set(0.9);
 
-maxVelX.get(function(value) {
-  console.log('Value of ' + maxVelX.name + ' is ' + value);
+
+// Getting a param value
+// ---------------------
+
+var favoriteColor = new ros.Param({
+  name: 'favorite_color'
 });
 
-ros.getParamList(function(params) {
-  console.log('Current params in ROS: ' + params);
+favoriteColor.get(function(value) {
+  console.log('My robot\'s favorite color is ' + value);
 });
 
