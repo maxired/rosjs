@@ -41,7 +41,6 @@
     // Parses message responses from rosbridge and sends to the appropriate
     // topic, service, or param.
     socket.onmessage = function(message) {
-      console.log(message);
       var data = JSON.parse(message.data);
       if (data.op === 'publish') {
         ros.emit(data.topic, data.msg);
@@ -106,9 +105,6 @@
       topic.messageType  = options.messageType;
       topic.isAdvertised = false;
 
-      ros.idCounter++;
-      topic.id = 'topic:' + topic.name + ':' + ros.idCounter;
-
       // Every time a message is published for the given topic, the callback
       // will be called with the message object.
       topic.subscribe = function(callback) {
@@ -121,13 +117,14 @@
           topic.emit('message', message);
         });
 
+        ros.idCounter++;
+        var subscribeId = 'subscribe:' + topic.name + ':' + ros.idCounter;
         var call = {
           op    : 'subscribe'
-        , id    : topic.id
+        , id    : subscribeId
         , type  : topic.messageType
         , topic : topic.name
         };
-        console.log(call);
         callOnConnection(call);
       };
 
@@ -135,9 +132,11 @@
       // all subscribe callbacks.
       topic.unsubscribe = function() {
         ros.removeAllListeners([topic.name]);
+        ros.idCounter++;
+        var unsubscribeId = 'unsubscribe:' + topic.name + ':' + ros.idCounter;
         var call = {
           op    : 'unsubscribe'
-        , id    : topic.id
+        , id    : unsubscribeId
         , topic : topic.name
         };
         callOnConnection(call);
@@ -145,9 +144,11 @@
 
       // Registers as a publisher for the topic.
       topic.advertise = function() {
+        ros.idCounter++;
+        var advertiseId = 'advertise:' + topic.name + ':' + ros.idCounter;
         var call = {
           op    : 'advertise'
-        , id    : topic.id
+        , id    : advertiseId
         , type  : topic.messageType
         , topic : topic.name
         };
@@ -157,9 +158,11 @@
 
       // Unregisters as a publisher for the topic.
       topic.unadvertise = function() {
+        ros.idCounter++;
+        var unadvertiseId = 'unadvertise:' + topic.name + ':' + ros.idCounter;
         var call = {
           op    : 'unadvertise'
-        , id    : topic.id
+        , id    : unadvertiseId
         , topic : topic.name
         };
         callOnConnection(call);
@@ -172,9 +175,11 @@
           topic.advertise();
         }
 
+        ros.idCounter++;
+        var publishId = 'publish:' + topic.name + ':' + ros.idCounter;
         var call = {
           op    : 'publish'
-        , id    : topic.id
+        , id    : publishId
         , topic : topic.name
         , msg   : message
         };
@@ -234,7 +239,7 @@
       // Calls the service. Returns the service response in the callback.
       service.callService = function(request, callback) {
         ros.idCounter++;
-        serviceCallId = 'service:' + service.name + ':' + ros.idCounter;
+        serviceCallId = 'call_service:' + service.name + ':' + ros.idCounter;
 
         ros.once(serviceCallId, function(data) {
           var response = new ros.ServiceResponse(data);
