@@ -22,6 +22,9 @@
   var ROS = function(url) {
     var ros = this;
 
+    // Provides a unique ID for each message sent to the server.
+    ros.counter = 0;
+
     // Socket Handling
     // ---------------
 
@@ -92,11 +95,14 @@
     //  * messageType - the message type, like 'std_msgs/String'
     ros.Topic = function(options) {
       var topic          = this;
-      topic.isAdvertised = false;
       options            = options || {};
       topic.node         = options.node;
       topic.name         = options.name;
-      topic.messageType  = options.messageType
+      topic.messageType  = options.messageType;
+      topic.isAdvertised = false;
+
+      ros.counter++;
+      topic.id = 'topic:' + topic.name + ':' + ros.counter;
 
       // Every time a message is published for the given topic, the callback
       // will be called with the message object.
@@ -111,10 +117,12 @@
         });
 
         var call = {
-          op       : 'subscribe'
-        , type     : topic.messageType
-        , topic    : topic.name
+          op    : 'subscribe'
+        , id    : topic.id
+        , type  : topic.messageType
+        , topic : topic.name
         };
+        console.log(call);
         callOnConnection(call);
       };
 
@@ -123,8 +131,9 @@
       topic.unsubscribe = function() {
         ros.removeAllListeners([topic.name]);
         var call = {
-          op       : 'unsubscribe'
-        , topic    : topic.name
+          op    : 'unsubscribe'
+        , id    : topic.id
+        , topic : topic.name
         };
         callOnConnection(call);
       };
@@ -133,6 +142,7 @@
       topic.advertise = function() {
         var call = {
           op    : 'advertise'
+        , id    : topic.id
         , type  : topic.messageType
         , topic : topic.name
         };
@@ -144,6 +154,7 @@
       topic.unadvertise = function() {
         var call = {
           op    : 'unadvertise'
+        , id    : topic.id
         , topic : topic.name
         };
         callOnConnection(call);
@@ -158,6 +169,7 @@
 
         var call = {
           op    : 'publish'
+        , id    : topic.id
         , topic : topic.name
         , msg   : message
         };
