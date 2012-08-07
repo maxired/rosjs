@@ -23,7 +23,7 @@
     var ros = this;
 
     // Provides a unique ID for each message sent to the server.
-    ros.counter = 0;
+    ros.idCounter = 0;
 
     // Socket Handling
     // ---------------
@@ -70,14 +70,16 @@
 
     // Retrieves list of topics in ROS as an array.
     ros.getTopicList = function(callback) {
-      ros.once('/rosjs/topics', function(data) {
-        callback(data);
-      });
-      var call = {
-        receiver : '/rosjs/topics'
-      , msg      : []
-      };
-      callOnConnection(call);
+      var error = new Error('GetTopicList not integrated with rosbridge 2.0');
+      ros.emit('error', error);
+      // ros.once('/rosjs/topics', function(data) {
+      //   callback(data);
+      // });
+      // var call = {
+      //   receiver : '/rosjs/topics'
+      // , msg      : []
+      // };
+      // callOnConnection(call);
     };
 
     // Message objects are used for publishing and subscribing to and from
@@ -186,14 +188,16 @@
 
     // Retrieves list of active service names in ROS as an array.
     ros.getServiceList = function(callback) {
-      ros.once('/rosjs/services', function(data) {
-        callback(data);
-      });
-      var call = {
-        receiver : '/rosjs/services'
-      , msg      : []
-      };
-      callOnConnection(call);
+      var error = new Error('GetServiceList not integrated with rosbridge 2.0');
+      ros.emit('error', error);
+      // ros.once('/rosjs/services', function(data) {
+      //   callback(data);
+      // });
+      // var call = {
+      //   receiver : '/rosjs/services'
+      // , msg      : []
+      // };
+      // callOnConnection(call);
     };
 
     // A ServiceRequest is passed into the service call. Takes in an object
@@ -277,23 +281,27 @@
 
       // Fetches the value of the param and returns in the callback.
       param.get = function(callback) {
-        ros.once('/rosjs/get_param', function(value) {
-          callback(value);
-        });
-        var call = {
-          receiver : '/rosjs/get_param'
-        , msg      : [param.name]
-        };
-        callOnConnection(call);
+        var error = new Error('Param getting not integrated with rosbridge 2.0');
+        ros.emit('error', error);
+        // ros.once('/rosjs/get_param', function(value) {
+        //   callback(value);
+        // });
+        // var call = {
+        //   receiver : '/rosjs/get_param'
+        // , msg      : [param.name]
+        // };
+        // callOnConnection(call);
       };
 
       // Sets the value of the param in ROS.
       param.set = function(value) {
-        var call = {
-          receiver : '/rosjs/set_param'
-        , msg      : [param.name, value]
-        };
-        callOnConnection(call);
+        var error = new Error('Param setting not integrated with rosbridge 2.0');
+        ros.emit('error', error);
+        // var call = {
+        //   receiver : '/rosjs/set_param'
+        // , msg      : [param.name, value]
+        // };
+        // callOnConnection(call);
       };
     }
     ros.Param.prototype.__proto__ = EventEmitter2.prototype;
