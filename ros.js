@@ -43,8 +43,11 @@
     socket.onmessage = function(message) {
       console.log(message);
       var data = JSON.parse(message.data);
-      if (data.topic) {
+      if (data.op === 'publish') {
         ros.emit(data.topic, data.msg);
+      }
+      else if (data.op === 'service_response') {
+        ros.emit(data.id, data.values);
       }
     };
 
@@ -101,8 +104,8 @@
       topic.messageType  = options.messageType;
       topic.isAdvertised = false;
 
-      ros.counter++;
-      topic.id = 'topic:' + topic.name + ':' + ros.counter;
+      ros.idCounter++;
+      topic.id = 'topic:' + topic.name + ':' + ros.idCounter;
 
       // Every time a message is published for the given topic, the callback
       // will be called with the message object.
@@ -226,17 +229,24 @@
 
       // Calls the service. Returns the service response in the callback.
       service.callService = function(request, callback) {
-        ros.once(service.name, function(data) {
+        ros.idCounter++;
+        serviceCallId = 'service:' + service.name + ':' + ros.idCounter;
+
+        ros.once(serviceCallId, function(data) {
           var response = new ros.ServiceResponse(data);
           callback(response);
         });
+
         var requestValues = [];
         Object.keys(request).forEach(function(name) {
           requestValues.push(request[name]);
         });
+
         var call = {
-          receiver : service.name
-        , msg      : requestValues
+          op      : 'call_service'
+        , id      : serviceCallId
+        , service : service.name
+        , args    : requestValues
         };
         callOnConnection(call);
       };
