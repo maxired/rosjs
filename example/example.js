@@ -60,53 +60,53 @@ listener.subscribe(function(message) {
   console.log('Received message on ' + listener.name + ': ' + message.data);
 
   // If desired, we can unsubscribe from the topic as well.
-  listener.unregisterSubscriber();
+  listener.unsubscribe();
 });
 
 
-// Calling a service
-// -----------------
+// // Calling a service
+// // -----------------
 
-// First, we create a Service client with details of the service's name and
-// service type.
-var addTwoIntsClient = new ros.Service({
-  name        : '/add_two_ints'
-, serviceType : 'rospy_tutorials/AddTwoInts'
-});
+// // First, we create a Service client with details of the service's name and
+// // service type.
+// var addTwoIntsClient = new ros.Service({
+//   name        : '/add_two_ints'
+// , serviceType : 'rospy_tutorials/AddTwoInts'
+// });
 
-// Then we create a Service Request. The object we pass in to
-// ros.ServiceRequest matches the fields defined in the rospy_tutorials'
-// AddTwoInts.srv file.
-var request = new ros.ServiceRequest({ A: 1, B: 2});
+// // Then we create a Service Request. The object we pass in to
+// // ros.ServiceRequest matches the fields defined in the rospy_tutorials'
+// // AddTwoInts.srv file.
+// var request = new ros.ServiceRequest({ A: 1, B: 2});
 
-// Finally, we call the /add_two_ints service and get back the results in the
-// callback. The result is a ros.ServiceResponse object.
-addTwoIntsClient.callService(request, function(result) {
-  console.log('Result for service call on ' + addTwoIntsClient.name + ': ' + result.sum);
-});
-
-
-// Setting a param value
-// ---------------------
-
-// First, we create a Param object with the name of the param.
-var maxVelX = new ros.Param({
-  name: 'max_vel_x'
-});
-
-// Then we set the value of the param, which is sent to the ROS Parameter
-// Server.
-maxVelX.set(0.9);
+// // Finally, we call the /add_two_ints service and get back the results in the
+// // callback. The result is a ros.ServiceResponse object.
+// addTwoIntsClient.callService(request, function(result) {
+//   console.log('Result for service call on ' + addTwoIntsClient.name + ': ' + result.sum);
+// });
 
 
-// Getting a param value
-// ---------------------
+// // Setting a param value
+// // ---------------------
 
-var favoriteColor = new ros.Param({
-  name: 'favorite_color'
-});
+// // First, we create a Param object with the name of the param.
+// var maxVelX = new ros.Param({
+//   name: 'max_vel_x'
+// });
 
-favoriteColor.get(function(value) {
-  console.log('My robot\'s favorite color is ' + value);
-});
+// // Then we set the value of the param, which is sent to the ROS Parameter
+// // Server.
+// maxVelX.set(0.9);
+
+
+// // Getting a param value
+// // ---------------------
+
+// var favoriteColor = new ros.Param({
+//   name: 'favorite_color'
+// });
+
+// favoriteColor.get(function(value) {
+//   console.log('My robot\'s favorite color is ' + value);
+// });
 

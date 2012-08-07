@@ -38,9 +38,10 @@
     // Parses message responses from rosbridge and sends to the appropriate
     // topic, service, or param.
     socket.onmessage = function(message) {
+      console.log(message);
       var data = JSON.parse(message.data);
-      if (data.receiver) {
-        ros.emit(data.receiver, data.msg);
+      if (data.topic) {
+        ros.emit(data.topic, data.msg);
       }
     };
 
@@ -90,11 +91,12 @@
     //  * name - the topic name, like /cmd_vel
     //  * messageType - the message type, like 'std_msgs/String'
     ros.Topic = function(options) {
-      var topic         = this;
-      options           = options || {};
-      topic.node        = options.node;
-      topic.name        = options.name;
-      topic.messageType = options.messageType
+      var topic          = this;
+      topic.isAdvertised = false;
+      options            = options || {};
+      topic.node         = options.node;
+      topic.name         = options.name;
+      topic.messageType  = options.messageType
 
       // Every time a message is published for the given topic, the callback
       // will be called with the message object.
@@ -107,30 +109,57 @@
           var message = new ros.Message(data);
           topic.emit('message', message);
         });
+
         var call = {
-          receiver : '/rosjs/subscribe'
-        , msg      : [topic.name, -1]
+          op       : 'subscribe'
+        , type     : topic.messageType
+        , topic    : topic.name
         };
         callOnConnection(call);
       };
 
       // Unregisters as a subscriber for the topic. Unsubscribing will remove
       // all subscribe callbacks.
-      topic.unregisterSubscriber = function() {
+      topic.unsubscribe = function() {
         ros.removeAllListeners([topic.name]);
         var call = {
-          receiver : '/rosjs/unsubscribe'
-        , msg      : [topic.name]
+          op       : 'unsubscribe'
+        , topic    : topic.name
         };
         callOnConnection(call);
       };
 
+      // Registers as a publisher for the topic.
+      topic.advertise = function() {
+        var call = {
+          op    : 'advertise'
+        , type  : topic.messageType
+        , topic : topic.name
+        };
+        callOnConnection(call);
+        topic.isAdvertised = true;
+      };
+
+      // Unregisters as a publisher for the topic.
+      topic.unadvertise = function() {
+        var call = {
+          op    : 'unadvertise'
+        , topic : topic.name
+        };
+        callOnConnection(call);
+        topic.isAdvertised = false;
+      };
+
       // Publish the message. Takes in a ros.Message.
       topic.publish = function(message) {
+        if (!topic.isAdvertised) {
+          topic.advertise();
+        }
+
         var call = {
-          receiver : topic.name
-        , msg      : message
-        , type     : topic.messageType
+          op    : 'publish'
+        , topic : topic.name
+        , msg   : message
         };
         callOnConnection(call);
       };
