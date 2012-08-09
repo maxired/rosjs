@@ -7,6 +7,7 @@ the server with WebSockets.
 
 ## Table of Contents
 
+ * [Set Up Rosbridge](#set-up-rosbridge)
  * [How To](#how-to)
    * [Connect to ROS](#connect-to-ros)
    * [Publish a topic](#publish-a-topic)
@@ -18,6 +19,52 @@ the server with WebSockets.
  * [Understanding Events](#understanding-events)
  * [Handling Errors](#handling-errors)
  * [License](#license)
+
+## Set Up Rosbridge
+
+Ros.js relies on rosbridge running on the server or robot. Rosbridge provides a
+JSON interface to ROS, allowing any client to send JSON to publish or subscribe
+to ROS topics, call ROS services, and more. The rosbridge stack contains a
+WebSocket server, which ros.js connects to.
+
+To install and run rosbridge, perform the following steps:
+
+ 1. Download the [rosbridge 2.0](http://kforge.ros.org/rosbridge/trac) stack
+
+    ```bash
+    # Change into a directory on the ROS_PACKAGE_PATH,
+    # See: http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_PACKAGE_PATH
+    cd ~/ros_workspace
+    git clone http://kforge.ros.org/rosbridge/git rosbridge
+    ```
+
+ 2. Build the rosbridge stack
+
+    ```bash
+    rosmake rosbridge
+    ```
+
+ 4. Run ROS if not already running
+
+    ```bash
+    roscore
+    ```
+
+ 4. Run rosapi (provides services that return information about ROS, like topic list)
+
+    ```bash
+    rosrun rosapi rosapi.py
+    ```
+
+ 5. Run rosbridge_server (WebSocket server that rosjs will connect to)
+
+    ```bash
+    rosrun rosbridge_server rosbridge.py
+    ```
+
+After finishing these steps, rosbridge and its WebSocket server are running. Add
+ros.js to your site and [set the URL](#connect-to-ros) to the rosbridge
+WebSocket server.
 
 ## How To
 
