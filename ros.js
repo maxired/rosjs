@@ -68,17 +68,17 @@
     // ------
 
     // Retrieves list of topics in ROS as an array.
-    ros.getTopicList = function(callback) {
-      var error = new Error('GetTopicList not integrated with rosbridge 2.0');
-      ros.emit('error', error);
-      // ros.once('/rosjs/topics', function(data) {
-      //   callback(data);
-      // });
-      // var call = {
-      //   receiver : '/rosjs/topics'
-      // , msg      : []
-      // };
-      // callOnConnection(call);
+    ros.getTopics = function(callback) {
+      var topicsClient = new ros.Service({
+        name        : '/rosapi/topics'
+      , serviceType : 'rosapi/Topics'
+      });
+
+      var request = new ros.ServiceRequest();
+
+      topicsClient.callService(request, function(result) {
+        callback(result.topics);
+      });
     };
 
     // Message objects are used for publishing and subscribing to and from
@@ -192,17 +192,17 @@
     // --------
 
     // Retrieves list of active service names in ROS as an array.
-    ros.getServiceList = function(callback) {
-      var error = new Error('GetServiceList not integrated with rosbridge 2.0');
-      ros.emit('error', error);
-      // ros.once('/rosjs/services', function(data) {
-      //   callback(data);
-      // });
-      // var call = {
-      //   receiver : '/rosjs/services'
-      // , msg      : []
-      // };
-      // callOnConnection(call);
+    ros.getServices = function(callback) {
+      var servicesClient = new ros.Service({
+        name        : '/rosapi/services'
+      , serviceType : 'rosapi/Services'
+      });
+
+      var request = new ros.ServiceRequest();
+
+      servicesClient.callService(request, function(result) {
+        callback(result.services);
+      });
     };
 
     // A ServiceRequest is passed into the service call. Takes in an object
@@ -266,7 +266,7 @@
     // ------
 
     // Retrieves list of param names from the ROS Parameter Server as an array.
-    ros.getParamList = function(callback) {
+    ros.getParams = function(callback) {
       ros.once('/rosjs/get_param_names', function(data) {
         callback(data);
       });

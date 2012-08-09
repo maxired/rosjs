@@ -124,22 +124,15 @@ maxVelX.get(function(value) {
 
 ```javascript
 // Retrieves the current list of topics in ROS
-ros.getTopicList(function(topics) {
+ros.getTopics(function(topics) {
   console.log('Current topics in ROS: ' + topics);
 });
 ```
 
 ```javascript
 // Fetches list of all active services in ROS
-ros.getServiceList(function(services) {
+ros.getServices(function(services) {
   console.log('Current services in ROS: ' + services);
-});
-```
-
-```javascript
-// Gets param names stored in the ROS Parameter Server
-ros.getParamList(function(params) {
-  console.log('Current params in ROS: ' + params);
 });
 ```
 
