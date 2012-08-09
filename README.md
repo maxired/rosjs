@@ -18,6 +18,7 @@ the server with WebSockets.
    * [Get ROS system info](#get-ros-system-info)
  * [Understanding Events](#understanding-events)
  * [Handling Errors](#handling-errors)
+ * [Example](#example)
  * [License](#license)
 
 ## Set Up Rosbridge
@@ -222,6 +223,14 @@ ros.on('error', function(error) {
   console.log('There was an error with ROS: ' + error);
 });
 ```
+
+## Example
+
+A sample web app is provided under the `example/` directory. The example shows
+some basic usage of ros.js.
+
+To run, follow the [rosbridge setup](#set-up-rosbridge) first, then open the
+`example/index.html` file in a browser and follow the page's instructions.
 
 ## License
 
