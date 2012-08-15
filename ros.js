@@ -286,27 +286,35 @@
 
       // Fetches the value of the param and returns in the callback.
       param.get = function(callback) {
-        var error = new Error('Param getting not integrated with rosbridge 2.0');
-        ros.emit('error', error);
-        // ros.once('/rosjs/get_param', function(value) {
-        //   callback(value);
-        // });
-        // var call = {
-        //   receiver : '/rosjs/get_param'
-        // , msg      : [param.name]
-        // };
-        // callOnConnection(call);
+        var paramClient = new ros.Service({
+          name        : '/rosapi/get_param'
+        , serviceType : 'rosapi/GetParam'
+        });
+
+        var request = new ros.ServiceRequest({
+          name  : param.name
+        , value : JSON.stringify('')
+        });
+
+        paramClient.callService(request, function(result) {
+          var value = JSON.parse(result.value);
+          callback(value);
+        });
       };
 
       // Sets the value of the param in ROS.
       param.set = function(value) {
-        var error = new Error('Param setting not integrated with rosbridge 2.0');
-        ros.emit('error', error);
-        // var call = {
-        //   receiver : '/rosjs/set_param'
-        // , msg      : [param.name, value]
-        // };
-        // callOnConnection(call);
+        var paramClient = new ros.Service({
+          name        : '/rosapi/set_param'
+        , serviceType : 'rosapi/SetParam'
+        });
+
+        var request = new ros.ServiceRequest({
+          name: param.name
+        , value: JSON.stringify(value)
+        });
+
+        paramClient.callService(request, function() {});
       };
     }
     ros.Param.prototype.__proto__ = EventEmitter2.prototype;
