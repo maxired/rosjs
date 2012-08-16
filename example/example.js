@@ -17,8 +17,7 @@ ros.on('error', function(error) {
 // First, we create a Topic object with details of the topic's node, name, and
 // message type.
 var cmdVel = new ros.Topic({
-  node        : 'talker'
-, name        : '/cmd_vel'
+  name        : '/cmd_vel'
 , messageType : 'geometry_msgs/Twist'
 });
 
@@ -49,8 +48,7 @@ cmdVel.publish(twist);
 // the topic's node, name, and message type. Note that we can call publish or
 // subscribe on the same topic object.
 var listener = new ros.Topic({
-  node        : 'talker'
-, name        : '/listener'
+  name        : '/listener'
 , messageType : 'std_msgs/String'
 });
 
@@ -89,14 +87,21 @@ addTwoIntsClient.callService(request, function(result) {
 // Setting a param value
 // ---------------------
 
+ros.getParams(function(params) {
+  console.log(params);
+});
+
 // First, we create a Param object with the name of the param.
 var maxVelX = new ros.Param({
-  name: 'max_vel_x'
+  name: 'max_vel_y'
 });
 
 // Then we set the value of the param, which is sent to the ROS Parameter
 // Server.
-maxVelX.set(0.9);
+maxVelX.set(0.8);
+maxVelX.get(function(value) {
+  console.log('MAX VAL: ' + value);
+});
 
 
 // Getting a param value
@@ -105,6 +110,8 @@ maxVelX.set(0.9);
 var favoriteColor = new ros.Param({
   name: 'favorite_color'
 });
+
+favoriteColor.set('red');
 
 favoriteColor.get(function(value) {
   console.log('My robot\'s favorite color is ' + value);

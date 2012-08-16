@@ -82,8 +82,7 @@ var ros = new ROS('ws://localhost:9090');
 // ros.Topic provides publish and subscribe support for a ROS topic.
 // Creates a geometry_msgs/Twist topic named /cmd_vel.
 var cmdVel = new ros.Topic({
-  node        : 'talker'
-, name        : '/cmd_vel'
+  name        : '/cmd_vel'
 , messageType : 'geometry_msgs/Twist'
 });
 
@@ -110,8 +109,7 @@ cmdVel.publish(twist);
 ```javascript
 // Create a std_msgs/String topic named /listener.
 var listener = new ros.Topic({
-  node        : 'chat'
-, name        : '/listener'
+  name        : '/listener'
 , messageType : 'std_msgs/String'
 });
 
