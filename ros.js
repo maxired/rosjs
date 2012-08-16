@@ -54,6 +54,7 @@
     // yet connected.
     function callOnConnection(message) {
       var messageJson = JSON.stringify(message);
+      console.log(messageJson);
       if (socket.readyState !== WebSocket.OPEN) {
         ros.once('connection', function() {
           socket.send(messageJson);
@@ -267,14 +268,15 @@
 
     // Retrieves list of param names from the ROS Parameter Server as an array.
     ros.getParams = function(callback) {
-      ros.once('/rosjs/get_param_names', function(data) {
-        callback(data);
+      var paramsClient = new ros.Service({
+        name        : '/rosapi/get_param_names'
+      , serviceType : 'rosapi/GetParamNames'
       });
-      var call = {
-        receiver : '/rosjs/get_param_names'
-      , msg      : []
-      };
-      callOnConnection(call);
+
+      var request = new ros.ServiceRequest();
+      paramsClient.callService(request, function(result) {
+        callback(result.names);
+      });
     };
 
     // A ROS param. Options include:

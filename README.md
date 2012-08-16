@@ -171,19 +171,25 @@ maxVelX.get(function(value) {
 #### Get ROS system info
 
 ```javascript
-// Retrieves the current list of topics in ROS
+// Retrieves the current list of topics in ROS.
 ros.getTopics(function(topics) {
   console.log('Current topics in ROS: ' + topics);
 });
 ```
 
 ```javascript
-// Fetches list of all active services in ROS
+// Fetches list of all active services in ROS.
 ros.getServices(function(services) {
   console.log('Current services in ROS: ' + services);
 });
 ```
 
+```javascript
+// Gets list of all param names.
+ros.getParams(function(params) {
+  console.log('Current params in ROS: ' + params);
+});
+```
 
 ## Understanding Events
 
