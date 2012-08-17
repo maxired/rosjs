@@ -41,12 +41,51 @@
     // Parses message responses from rosbridge and sends to the appropriate
     // topic, service, or param.
     socket.onmessage = function(message) {
+      function handleMessage(message) {
+        if (message.op === 'publish') {
+          ros.emit(message.topic, message.msg);
+        }
+        else if (message.op === 'service_response') {
+          ros.emit(message.id, message.values);
+        }
+      };
+
       var data = JSON.parse(message.data);
-      if (data.op === 'publish') {
-        ros.emit(data.topic, data.msg);
-      }
-      else if (data.op === 'service_response') {
-        ros.emit(data.id, data.values);
+      if (data.op === 'png') {
+        // We need to uncompress the data before sending it through (use image/canvas to do so)
+        var img = new Image();
+        // When the image loads, we will extract the raw data (JSON message)
+		img.onload = function() {
+			debugger;
+		  // Create a local canvas to draw on
+		  var cvs = document.createElement('canvas');
+		  var ctx = cvs.getContext('2d');
+
+          // Set width and height
+          ctx.width = img.width;
+          ctx.height = img.height;
+
+          // Put the data into the image
+          ctx.drawImage(img, 0, 0);
+          // Grab the raw, uncompressed data
+          var imgData = ctx.getImageData( 0, 0, img.width, img.height).data;
+
+          // Construct the JSON
+          var jsonData = "";
+          for (var i = 0; i < imgData.length; i += 4) {
+            if (imgData[i] > 0) {
+              jsonData += String.fromCharCode(imgData[i]);
+            }
+          }
+		  
+          handleMessage(JSON.parse(jsonData));
+		};
+		console.log(data.data.length);
+        // Send the image data to load
+        img.src = 'data:image/png;base64,' + data.data;
+		debugger;
+      } else {
+        handleMessage(data);
       }
     };
 
@@ -54,7 +93,7 @@
     // yet connected.
     function callOnConnection(message) {
       var messageJson = JSON.stringify(message);
-      console.log(messageJson);
+
       if (socket.readyState !== WebSocket.OPEN) {
         ros.once('connection', function() {
           socket.send(messageJson);
@@ -64,41 +103,6 @@
         socket.send(messageJson);
       }
     };
-
-    // ROS Message
-    // -----------
-
-    // Time corresponds to the ROS Time message field, which is a tuple
-    // containing secs, nsecs.
-    ros.Time = function(options) {
-      var time = this;
-      options    = options || {};
-      time.secs  = options.secs || 0;
-      time.nsecs = options.nsecs || 0;
-
-      time.now = function() {
-        var now   = new Date().valueOf();
-        var secs  = Math.round(now / 1000);
-        var msecs = (now % 1000);
-        var nsecs = msecs * 1000000;
-
-        time.secs  = secs;
-        time.nsecs = nsecs;
-        return time;
-      };
-    };
-
-    // Message objects are used for publishing and subscribing to and from
-    // topics. Takes in an object matching the fields defined in the .msg
-    // definition file.
-    ros.Message = function(values) {
-      var message = this;
-      if (values) {
-        Object.keys(values).forEach(function(name) {
-          message[name] = values[name];
-        });
-      }
-    }
 
     // Topics
     // ------
@@ -117,6 +121,18 @@
       });
     };
 
+    // Message objects are used for publishing and subscribing to and from
+    // topics. Takes in an object matching the fields defined in the .msg
+    // definition file.
+    ros.Message = function(values) {
+      var message = this;
+      if (values) {
+        Object.keys(values).forEach(function(name) {
+          message[name] = values[name];
+        });
+      }
+    }
+
     // Publish and/or subscribe to a topic in ROS. Options include:
     //  * node - the name of the node to register under
     //  * name - the topic name, like /cmd_vel
@@ -128,6 +144,13 @@
       topic.name         = options.name;
       topic.messageType  = options.messageType;
       topic.isAdvertised = false;
+      topic.compression  = options.compression || 'none';
+		
+
+      // Check for valid compression types
+      if (topic.compression && topic.compression !== 'png' && topic.compression !== 'none') {
+        topic.emit('warning', topic.compression + ' compression is not supported. No comression will be used.');
+      }
 
       // Every time a message is published for the given topic, the callback
       // will be called with the message object.
@@ -144,11 +167,13 @@
         ros.idCounter++;
         var subscribeId = 'subscribe:' + topic.name + ':' + ros.idCounter;
         var call = {
-          op    : 'subscribe'
-        , id    : subscribeId
-        , type  : topic.messageType
-        , topic : topic.name
+          op          : 'subscribe'
+        , id          : subscribeId
+        , type        : topic.messageType
+        , topic       : topic.name
+        , compression : topic.compression
         };
+
         callOnConnection(call);
       };
 
