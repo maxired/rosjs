@@ -16,29 +16,37 @@ ros.on('error', function(error) {
 
 // First, we create a Topic object with details of the topic's node, name, and
 // message type.
-var cmdVel = new ros.Topic({
-  name        : '/cmd_vel'
-, messageType : 'geometry_msgs/Twist'
+var robotPose = new ros.Topic({
+  name        : '/robot_pose'
+, messageType : 'geometry_msgs/PoseStamped'
 });
 
 // Then we create the payload to be published. The object we pass in to
-// ros.Message matches the fields defined in the geometry_msgs/Twist .msg
+// ros.Message matches the fields defined in the geometry_msgs/PoseStamped.msg
 // definition.
-var twist = new ros.Message({
-  angular: {
-    x: 1
-  , y: 0
-  , z: 0
+var poseStamped = new ros.Message({
+  header: {
+    seq      : 0
+  , stamp    : new ros.Time().now()
+  , frame_id : ''
   }
-, linear: {
-    x: 0
-  , y: 0
-  , z: 0
+, pose: {
+    position: {
+      x : 36
+    , y : 42
+    , z : 0
+    }
+  , orientation: {
+      x : 0
+    , y : 0
+    , z : 0
+    , w : 0
+    }
   }
 });
 
 // And finally, publish.
-cmdVel.publish(twist);
+robotPose.publish(poseStamped);
 
 
 // Subscribing to a Topic

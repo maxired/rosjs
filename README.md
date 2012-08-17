@@ -15,6 +15,7 @@ the server with WebSockets.
    * [Call a service](#call-a-service)
    * [Set a param value](#set-a-param-value)
    * [Get a param value](#get-a-param-value)
+   * [Work with ROS Time](#work-with-ros-time)
    * [Get ROS system info](#get-ros-system-info)
  * [Understanding Events](#understanding-events)
  * [Handling Errors](#handling-errors)
@@ -164,6 +165,26 @@ var maxVelX = new ros.Param({
 maxVelX.get(function(value) {
   console.log('Value of ' + maxVelX.name + ' is ' + value);
 });
+```
+
+#### Work with ROS Time
+
+```javascript
+// Creates a ROS timestamp, which defaults to 0 seconds and 0 nanoseconds.
+var time = new ros.Time();
+```
+
+```javascript
+// Creates a ROS timestamp with a specified time.
+var time = new ros.Time({
+  secs  : 1345158610
+, nsecs : 25000000
+});
+```
+
+```javascript
+// Creates a ROS timestamp set to the current time of the user.
+var time = new ros.Time().now();
 ```
 
 #### Get ROS system info

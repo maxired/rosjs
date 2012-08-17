@@ -65,6 +65,41 @@
       }
     };
 
+    // ROS Message
+    // -----------
+
+    // Time corresponds to the ROS Time message field, which is a tuple
+    // containing secs, nsecs.
+    ros.Time = function(options) {
+      var time = this;
+      options    = options || {};
+      time.secs  = options.secs || 0;
+      time.nsecs = options.nsecs || 0;
+
+      time.now = function() {
+        var now   = new Date().valueOf();
+        var secs  = Math.round(now / 1000);
+        var msecs = (now % 1000);
+        var nsecs = msecs * 1000000;
+
+        time.secs  = secs;
+        time.nsecs = nsecs;
+        return time;
+      };
+    };
+
+    // Message objects are used for publishing and subscribing to and from
+    // topics. Takes in an object matching the fields defined in the .msg
+    // definition file.
+    ros.Message = function(values) {
+      var message = this;
+      if (values) {
+        Object.keys(values).forEach(function(name) {
+          message[name] = values[name];
+        });
+      }
+    }
+
     // Topics
     // ------
 
@@ -81,18 +116,6 @@
         callback(result.topics);
       });
     };
-
-    // Message objects are used for publishing and subscribing to and from
-    // topics. Takes in an object matching the fields defined in the .msg
-    // definition file.
-    ros.Message = function(values) {
-      var message = this;
-      if (values) {
-        Object.keys(values).forEach(function(name) {
-          message[name] = values[name];
-        });
-      }
-    }
 
     // Publish and/or subscribe to a topic in ROS. Options include:
     //  * node - the name of the node to register under
