@@ -52,39 +52,36 @@
 
       var data = JSON.parse(message.data);
       if (data.op === 'png') {
-        // We need to uncompress the data before sending it through (use image/canvas to do so)
-        var img = new Image();
-        // When the image loads, we will extract the raw data (JSON message)
-		img.onload = function() {
-			debugger;
-		  // Create a local canvas to draw on
-		  var cvs = document.createElement('canvas');
-		  var ctx = cvs.getContext('2d');
+        // Uncompresses the data before sending it through (use image/canvas to do so).
+        var image = new Image();
+        // When the image loads, extracts the raw data (JSON message).
+        image.onload = function() {
+          // Creates a local canvas to draw on.
+          var canvas  = document.createElement('canvas');
+          var context = canvas.getContext('2d');
 
-          // Set width and height
-          ctx.width = img.width;
-          ctx.height = img.height;
+          // Sets width and height.
+          context.width = image.width;
+          context.height = image.height;
 
-          // Put the data into the image
-          ctx.drawImage(img, 0, 0);
-          // Grab the raw, uncompressed data
-          var imgData = ctx.getImageData( 0, 0, img.width, img.height).data;
+          // Puts the data into the image.
+          context.drawImage(image, 0, 0);
+          // Grabs the raw, uncompressed data.
+          var imageData = context.getImageData(0, 0, image.width, image.height).data;
 
-          // Construct the JSON
-          var jsonData = "";
-          for (var i = 0; i < imgData.length; i += 4) {
-            if (imgData[i] > 0) {
-              jsonData += String.fromCharCode(imgData[i]);
+          // Constructs the JSON.
+          var jsonData = '';
+          for (var i = 0; i < imageData.length; i += 4) {
+            if (imageData[i] > 0) {
+              jsonData += String.fromCharCode(imageData[i]);
             }
           }
-		  
           handleMessage(JSON.parse(jsonData));
-		};
-		console.log(data.data.length);
-        // Send the image data to load
-        img.src = 'data:image/png;base64,' + data.data;
-		debugger;
-      } else {
+        };
+        // Sends the image data to load.
+        image.src = 'data:image/png;base64,' + data.data;
+      }
+      else {
         handleMessage(data);
       }
     };
@@ -145,7 +142,6 @@
       topic.messageType  = options.messageType;
       topic.isAdvertised = false;
       topic.compression  = options.compression || 'none';
-		
 
       // Check for valid compression types
       if (topic.compression && topic.compression !== 'png' && topic.compression !== 'none') {
