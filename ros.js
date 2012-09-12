@@ -61,8 +61,8 @@
           var context = canvas.getContext('2d');
 
           // Sets width and height.
-          context.width = image.width;
-          context.height = image.height;
+          canvas.width = image.width;
+          canvas.height = image.height;
 
           // Puts the data into the image.
           context.drawImage(image, 0, 0);
@@ -72,9 +72,8 @@
           // Constructs the JSON.
           var jsonData = '';
           for (var i = 0; i < imageData.length; i += 4) {
-            if (imageData[i] > 0) {
-              jsonData += String.fromCharCode(imageData[i]);
-            }
+            // RGB
+            jsonData += String.fromCharCode(imageData[i], imageData[i+1], imageData[i+2]);
           }
           handleMessage(JSON.parse(jsonData));
         };
@@ -128,7 +127,7 @@
           message[name] = values[name];
         });
       }
-    }
+    };
 
     // Publish and/or subscribe to a topic in ROS. Options include:
     //  * node - the name of the node to register under
@@ -259,7 +258,7 @@
           serviceRequest[name] = values[name];
         });
       }
-    }
+    };
 
     // A ServiceResponse is returned from the service call. Takes in an object
     // matching the values of the response part from the .srv file.
@@ -270,7 +269,7 @@
           serviceResponse[name] = values[name];
         });
       }
-    }
+    };
 
     // A ROS service client. Options include:
     //  * name - the service name, like /add_two_ints
@@ -362,7 +361,7 @@
 
         paramClient.callService(request, function() {});
       };
-    }
+    };
     ros.Param.prototype.__proto__ = EventEmitter2.prototype;
 
   };
