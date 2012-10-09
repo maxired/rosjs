@@ -10,6 +10,7 @@ the server with WebSockets.
  * [Set Up Rosbridge](#set-up-rosbridge)
  * [How To](#how-to)
    * [Connect to ROS](#connect-to-ros)
+   * [Disconnect from ROS](#disconnect-from-ros)
    * [Publish a topic](#publish-a-topic)
    * [Subscribe to a topic](#subscribe-to-a-topic)
    * [Call a service](#call-a-service)
@@ -76,6 +77,21 @@ WebSocket server.
 ```javascript
 // Connects to the rosbridge WebSocket server.
 var ros = new ROS('ws://localhost:9090');
+```
+
+or
+
+```javascript
+// Connects to the rosbridge WebSocket server.
+var ros = new ROS();
+ros.connect('ws://localhost:9090');
+```
+
+#### Disconnect from ROS
+
+```javascript
+// Disconnects from the rosbridge WebSocket server.
+ros.close();
 ```
 
 #### Publish a topic
