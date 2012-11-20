@@ -1,0 +1,22 @@
+{
+  "name": "rosjs",
+  "version": "0.0.0",
+  "description": "Ros.js provides the core JavaScript API for interacting with [ROS](http://ros.org) via the web. Ros.js supports publishing and subscribing to topics, getting and setting parameters, and calling services in ROS.",
+  "main": "ros.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RobotWebTools/rosjs.git"
+  },
+  "author": "",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "eventemitter2": "~0.4.11"
+  }
+}

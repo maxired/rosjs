@@ -4,16 +4,23 @@
 //
 // See:
 //  * AMD - http://bryanforbes.github.com/amd-commonjs-modules-presentation/2011-10-29/)
-//  * UMD - https://github.com/umdjs/umd/blob/master/amdWeb.js
+//  * UMD - https://github.com/umdjs/umd/blob/master/returnExports.js
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
+   if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory(require('eventemitter2').EventEmitter2);
+  }
+  else  if (typeof define === 'function' && define.amd) {
     define(['eventemitter2'], factory);
   }
   else {
     root.ROS = factory(root.EventEmitter2);
   }
 }(this, function (EventEmitter2) {
-
+console.trace();
+console.log("inside fac" , EventEmitter2);
   // Takes in the URL of the WebSocket server.
   // Emits the following events:
   //  * 'error' - there was an error with ROS
