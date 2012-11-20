@@ -10,7 +10,9 @@
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like enviroments that support module.exports,
         // like Node.
-        module.exports = factory(require('eventemitter2').EventEmitter2);
+         WebSocket = require('ws');
+	 module.exports = factory(require('eventemitter2').EventEmitter2);
+	
   }
   else  if (typeof define === 'function' && define.amd) {
     define(['eventemitter2'], factory);

@@ -17,6 +17,7 @@
   "license": "BSD",
   "readmeFilename": "README.md",
   "dependencies": {
-    "eventemitter2": "~0.4.11"
+    "eventemitter2": "~0.4.11",
+    "ws": "~0.4.23"
   }
 }
