@@ -19,8 +19,6 @@
     root.ROS = factory(root.EventEmitter2);
   }
 }(this, function (EventEmitter2) {
-console.trace();
-console.log("inside fac" , EventEmitter2);
   // Takes in the URL of the WebSocket server.
   // Emits the following events:
   //  * 'error' - there was an error with ROS
